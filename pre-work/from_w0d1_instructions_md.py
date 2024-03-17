@@ -672,6 +672,8 @@ assert_all_equal(actual, expected)
 ########################################## Practice with torch.as_strided ##########################################
 # NOTE: The resources links provided by the tutorial are very confusing since in the end in this exercise I don't have to think in terms of bytes or bits. I have to first set the size argument to the same size as the output tensor and then I have to calculate the stride. There's gonna be as many strides as dimensions in the size and each entry for a stride is how many elements it moves across a dimension. The examples in 2D output tensors are very helpful to understand this. I do not understand in higher dimensions
 
+# See https://chat.openai.com/share/2686c52d-fe04-40c1-b540-20029e6138bf
+
 from collections import namedtuple
 
 TestCase = namedtuple("TestCase", ["output", "size", "stride"])
@@ -730,7 +732,10 @@ def test_relu(relu_func):
 
 def relu_clone_setitem(x: t.Tensor) -> t.Tensor:
     """Make a copy with torch.clone and then assign to parts of the copy."""
-    pass
+    # pass
+    xclone = x.clone()
+    xclone[xclone < 0] = 0
+    return xclone
 
 
 test_relu(relu_clone_setitem)
@@ -739,7 +744,8 @@ test_relu(relu_clone_setitem)
 
 def relu_where(x: t.Tensor) -> t.Tensor:
     """Use torch.where."""
-    pass
+    # pass
+    return t.where(x>0, x, t.tensor(0.0))
 
 
 test_relu(relu_where)
@@ -748,7 +754,8 @@ test_relu(relu_where)
 
 def relu_maximum(x: t.Tensor) -> t.Tensor:
     """Use torch.maximum."""
-    pass
+    # pass
+    return t.maximum(x,t.tensor(0.0))
 
 
 test_relu(relu_maximum)
@@ -757,7 +764,12 @@ test_relu(relu_maximum)
 
 def relu_abs(x: t.Tensor) -> t.Tensor:
     """Use torch.abs."""
-    pass
+    # pass
+
+    # return t.abs(x) * (x >= 0).float()
+
+    # alternative mlab
+    return (x.abs() + x) / 2.0
 
 
 test_relu(relu_abs)
@@ -766,7 +778,8 @@ test_relu(relu_abs)
 
 def relu_multiply_bool(x: t.Tensor) -> t.Tensor:
     """Create a boolean tensor and multiply the input by it elementwise."""
-    pass
+    # pass
+    return (x >= 0) * x
 
 
 test_relu(relu_multiply_bool)
