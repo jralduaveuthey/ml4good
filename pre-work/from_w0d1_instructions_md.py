@@ -492,15 +492,29 @@ def batched_logsumexp(matrix: t.Tensor) -> t.Tensor:
     Do this without using PyTorch's logsumexp function.
 
     A couple useful blogs about this function:
-    - https://leimao.github.io/blog/LogSumExp/
+    - https://leimao.github.io/blog/LogSumExp/ -> useful 
     - https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/
     """
-    pass
+    # pass
+    max_values, _ = matrix.max(dim=1) 
+    a = max_values
+    # Reshape max_values for broadcasting by adding an extra dimension
+    a_reshaped = rearrange(a, "n -> n 1")
+    out = a + (matrix - a_reshaped).exp().sum(dim=1).log()
+
+    # alternative mlab
+    C = matrix.max(dim=-1).values
+    exps = t.exp(matrix - rearrange(C, "n -> n 1"))
+    out = C + t.log(t.sum(exps, dim=-1))
+
+    return out
 
 
 matrix = t.tensor([[-1000, -1000, -1000, -1000], [1000, 1000, 1000, 1000]])
 expected = t.tensor([-1000 + math.log(4), 1000 + math.log(4)])
 actual = batched_logsumexp(matrix)
+print("expected", expected)
+print("actual", actual)
 assert_all_close(actual, expected)
 matrix2 = t.randn((10, 20))
 expected2 = t.logsumexp(matrix2, dim=-1)
@@ -519,7 +533,17 @@ def batched_softmax(matrix: t.Tensor) -> t.Tensor:
 
     Return: (batch, n). For each i, out[i] should sum to 1.
     """
-    pass
+    # pass
+    exps = matrix.exp()
+    exp_sums = exps.sum(dim=1)
+    exp_sums_col = rearrange(exp_sums, "n -> n 1")
+    out = exps / exp_sums_col 
+
+    # alternative mlab
+    exp = matrix.exp()
+    out = exp / exp.sum(dim=-1, keepdim=True)
+
+    return out 
 
 
 matrix = t.arange(1, 6).view((1, 5)).float().log()
@@ -547,8 +571,10 @@ def batched_logsoftmax(matrix: t.Tensor) -> t.Tensor:
     Do this without using PyTorch's logsoftmax function.
     For each row, subtract the maximum first to avoid overflow if the row contains large values.
     """
-    pass
+    # pass
+    out = matrix - batched_logsumexp(matrix)
 
+    return out
 
 matrix = t.arange(1, 6).view((1, 5)).float()
 start = 1000
@@ -570,7 +596,21 @@ def batched_cross_entropy_loss(logits: t.Tensor, true_labels: t.Tensor) -> t.Ten
     Hint: convert the logits to log-probabilities using your batched_logsoftmax from above.
     Then the loss for an example is just the negative of the log-probability that the model assigned to the true class. Use torch.gather to perform the indexing.
     """
-    pass
+    # pass
+    assert logits.shape[0] == true_labels.shape[0]
+    assert true_labels.max() < logits.shape[1]
+
+    log_probs = batched_logsoftmax(logits)
+    out2D = -t.gather(log_probs, 1, true_labels.unsqueeze(1))
+    out = rearrange(out2D, "n 1 -> n")
+
+    # alternative mlab
+    logprobs = batched_logsoftmax(logits)
+    indices = rearrange(true_labels, "n -> n 1")
+    pred_at_index = logprobs.gather(1, indices)
+    out =  -rearrange(pred_at_index, "n 1 -> n")
+    return out
+    #here the solution from mlab is the same but there is an AssertionError in the test...dunno why
 
 
 logits = t.tensor([[float("-inf"), float("-inf"), 0], [1 / 3, 1 / 3, 1 / 3], [float("-inf"), 0, 0]])
@@ -590,7 +630,8 @@ def collect_rows(matrix: t.Tensor, row_indexes: t.Tensor) -> t.Tensor:
     Return: shape (k, n). out[i] is matrix[row_indexes[i]].
     """
     assert row_indexes.max() < matrix.shape[0]
-    pass
+    # pass
+    return matrix[row_indexes]
 
 
 matrix = t.arange(15).view((5, 3))
@@ -610,7 +651,14 @@ def collect_columns(matrix: t.Tensor, column_indexes: t.Tensor) -> t.Tensor:
     Return: shape (m, k). out[:, i] is matrix[:, column_indexes[i]].
     """
     assert column_indexes.max() < matrix.shape[1]
-    pass
+    # pass
+    matrixT = matrix.T
+    temp = matrixT[column_indexes]
+    out = temp.T
+
+    # alternative mlab
+    out = matrix[:, column_indexes]
+    return out  
 
 
 matrix = t.arange(15).view((5, 3))
@@ -622,31 +670,51 @@ assert_all_equal(actual, expected)
 # %%
 
 ########################################## Practice with torch.as_strided ##########################################
+# NOTE: The resources links provided by the tutorial are very confusing since in the end in this exercise I don't have to think in terms of bytes or bits. I have to first set the size argument to the same size as the output tensor and then I have to calculate the stride. There's gonna be as many strides as dimensions in the size and each entry for a stride is how many elements it moves across a dimension. The examples in 2D output tensors are very helpful to understand this. I do not understand in higher dimensions
+
 from collections import namedtuple
 
 TestCase = namedtuple("TestCase", ["output", "size", "stride"])
 test_input_a = t.tensor([[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19]])
 test_cases = [
-    TestCase(output=t.tensor([0, 1, 2, 3]), size=(1,), stride=(1,)),
-    TestCase(output=t.tensor([[0, 1, 2], [5, 6, 7]]), size=(1,), stride=(1,)),
-    TestCase(output=t.tensor([[0, 0, 0], [11, 11, 11]]), size=(1,), stride=(1,)),
-    TestCase(output=t.tensor([0, 6, 12, 18]), size=(1,), stride=(1,)),
-    TestCase(output=t.tensor([[[0, 1, 2]], [[9, 10, 11]]]), size=(1,), stride=(1,)),
+    TestCase(output=t.tensor([0, 1, 2, 3]), size=(4,), stride=(1,)), #This creates a 1-dimensional tensor of size 4. The stride of 1 means it will take consecutive elements from the original tensor without skipping any, starting from the first element. Thus, it takes the first four elements of the first row.
+
+    TestCase(output=t.tensor([[0, 1, 2], [5, 6, 7]]), size=(2,3), stride=(5,1)), #This specifies a 2x3 tensor. The stride (5, 1) means for the row dimension, it jumps 5 elements to start the next row, which essentially moves down a row in the original tensor (since it has 5 columns). The column stride of 1 takes consecutive elements within the row. Thus, it forms two rows: the first row of the original tensor and the second row of the original tensor, each with the first three elements.
+
+    TestCase(output=t.tensor([[0, 0, 0], [11, 11, 11]]), size=(2,3), stride=(11,0)), #"jump 11 elements to start the next row" and "do not move when changing columns,"
+
+    TestCase(output=t.tensor([0, 6, 12, 18]), size=(4,), stride=(6,)),  #"jump 6 elements to start the next row" 
+
+    TestCase(output=t.tensor([[[0, 1, 2]], [[9, 10, 11]]]), size=(2,1,3), stride=(9,0,1)),# This case specifies a tensor of shape 2x1x3. The stride (9, 0, 1) means it jumps 9 elements to get to the next 2D slice, does not move to get to the next row within each 2D slice, and moves 1 element to get to the next column within each row.
+
     TestCase(
         output=t.tensor([[[[0, 1], [2, 3]], [[4, 5], [6, 7]]], [[[12, 13], [14, 15]], [[16, 17], [18, 19]]]]),
-        size=(1,),
-        stride=(1,),
+        size=(2, 2, 2, 2),
+        stride=(12, 4, 2, 1),
+        # Move 12 elements to go to the next 3D block.
+        # Move 4 elements to go to the next 2D slice within each 3D block.
+        # Move 2 elements to go to the next row within each 2D slice.
+        # Move 1 element to go to the next column within each row.
     ),
 ]
+
 for (i, case) in enumerate(test_cases):
     actual = test_input_a.as_strided(size=case.size, stride=case.stride)
     if (case.output != actual).any():
         print(f"Test {i} failed:")
         print(f"Expected: {case.output}")
-        print(f"Actual: {actual}")
+        print(f"**********Actual: {actual}")
+        print("-------------------")	
     else:
         print(f"Test {i} passed!")
+        print(f"Expected: {case.output}")
+        print(f">>>>>>>>>Actual: {actual}")
+        print("-------------------")	
 
+
+a = t.tensor([[1, 2, 3], [4, 5, 6]])
+view_with_stride_custom = t.as_strided(a, size=(1, 3), stride=(2, 1))
+print(view_with_stride_custom)
 
 # %%
 
