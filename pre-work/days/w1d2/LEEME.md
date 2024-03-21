@@ -1,0 +1,1 @@
+The adversarial attacks notebook requires GPU so I run it in this colab https://colab.research.google.com/drive/1ZAhYYf6yf5s0rlwNBwJhGSCI3uCk2mU7
