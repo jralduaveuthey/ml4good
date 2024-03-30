@@ -1,0 +1,1 @@
+* exact difference between pretraining and self-supervised learning in Foundational Models??
