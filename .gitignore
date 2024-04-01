@@ -21,3 +21,5 @@ mlab/w1d2_cifar10_train/**
 days/w1d2/.DS_Store
 *.pth
 *.zip
+
+ML4G-2.0/**
