@@ -1,0 +1,48 @@
+# If you don't have a GPU, you can run
+# pip3 install torch  --index-url https://download.pytorch.org/whl/cpu
+# Before installing the requirement.txt
+torch
+
+anthropic
+black[jupyter]
+einops
+ipykernel
+ipywidgets
+torchvision
+jaxtyping
+jupyter
+matplotlib
+notebook
+openai
+pandas
+plotly
+pre-commit
+rich
+tqdm
+transformer_utils
+transformer_lens
+transformers
+typeguard
+typer
+scikit-learn
+
+# accelerate
+# black
+# click
+# diffusers
+# fancy_einsum
+# flask
+# ftfy
+# gym==0.23.1
+# joblib
+# mediapy
+# numpy-stl
+# pygame
+# pytest
+# requests
+# sentence-transformers
+# sympy
+# tensorboard
+# torchtyping
+# transformers
+# wandb
