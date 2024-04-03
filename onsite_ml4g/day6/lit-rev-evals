@@ -1,0 +1,52 @@
+[1] Model evaluation for extreme risks  
+[2] METR Report	  
+[3] ML Metrics - CAIS  
+[4] Example Ideas | SafeBench Competition   
+[5] Weapons of Mass Destruction Proxy Benchmark https://www.wmdp.ai/  
+
+----------
+
+# [1] Model evaluation for extreme risks  
+* Propensity (alignment) vs Capabilities (dangerous capabilities)
+* Section 2 motivates our focus on extreme risks from general-purpose models and refines the scope of the paper. 
+* Section 3 outlines a vision for how model evaluations for such risks should be incorporated into AI governance frameworks. 
+* Section 4 describes early work in the area and outlines key design criteria for extreme risk evaluations. 
+* Section 5 discusses the limitations of model evaluations for extreme risks and outlines ways in which work on these evaluations could cause unintended harm. We conclude with high-level recommendations for AI developers and policymakers.
+
+# [2] METR Report	  
+* Model agesnts to acquire resources, self-replicate and adapt/generalise => “autonomous replication and adaptation” or ARA
+* Authors do experiments and think that current models are not good doing ARA tasks atm (4 months ago)
+* Authors think that next generations of models, or current models but finetuned, could do many of these ARA tasks so evals pretraining now
+
+# [3] ML Metrics - CAIS  
+* Benchmarks are one type of eval
+* Properties of good benchmarks
+	* Clear Evaluation: There is a lot of attributes (meta-metrics) for benchcmarks. E.g.: ease of use, cost to evaluate, connection of the benchmark with a real problem, tractability, difficulty to game, feasibility of developing new methods to improve the state-of-the-art, etc.
+	* Minimal barriers to entry: Strong preferential attachment dynamics: the most used benchmarks are the most likely to be used further
+	* The process of building benchmarks: Their design is hard since it requires the researcher to effectively concretize a nebulous notion into a single number.
+	
+# [4] Example Ideas | SafeBench Competition   
+4 categories where authors would like to see benchmarks:
+* Robustness: designing systems to be reliable in the face of adversaries and highly unusual situations.
+	* Jailbreaking Text and Multimodal Models: Improving defenses against adversarial attacks.
+	* Proxy gaming: Detecting when models are pursuing proxies to the detriment of the true goal, and developing robust proxies.
+	* Agent and Text Out-of-Distribution Detection: Detecting out-of-distribution text or events in a reinforcement learning context.
+* Monitoring: detect malicious use, monitor predictions, and discover unexpected model functionality
+	* Emergent Capabilities: Improving defenses against adversarial attacks.
+	* Hazardous Capability Unlearning: Improving defenses against adversarial attacks.
+	* Transparency: Building tools that offer clarity into model inner workings.
+	* Trojans
+* Alignment: building models that represent and safely optimize difficult-to-specify human values.
+	* Power Seeking
+	* Honest Models
+	* Collusion
+	* Moral decisions
+* Safety Applications: using ML to address broader risks related to how ML systems are handled.
+	* Cyberdefense
+	* Deep Learning for Biodefense
+	
+# [5] Weapons of Mass Destruction Proxy Benchmark https://www.wmdp.ai/  
+* (WMDP) benchmark, a dataset of 4,157 multiple-choice questions that serve as a proxy measurement of hazardous knowledge in biosecurity, cybersecurity, and chemical security
+* two roles: 
+	* first, as an evaluation for hazardous knowledge in LLMs, and 
+	* second, as a benchmark for unlearning methods to remove such hazardous knowledge => CUT, a state-of-the-art unlearning method based on controlling model representations. CUT reduces model performance on WMDP while maintaining general capabilities in (some) areas
