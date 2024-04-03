@@ -5,7 +5,6 @@
 [5] Weapons of Mass Destruction Proxy Benchmark https://www.wmdp.ai/  
 
 ----------
-
 # [1] Model evaluation for extreme risks  
 * Propensity (alignment) vs Capabilities (dangerous capabilities)
 * Section 2 motivates our focus on extreme risks from general-purpose models and refines the scope of the paper. 
