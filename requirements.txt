@@ -26,6 +26,8 @@ typeguard
 typer
 scikit-learn
 
+pytest
+
 # accelerate
 # black
 # click

@@ -61,7 +61,7 @@ def logit_lense_analysis(input_prompt: str, gpt2_small):
     return tokens, top_unembedded_residual_stream_caches, kl_divergences
 
 
-def test_logit_lense_analysis(implementation_function, model):
+def test_logit_lens_analysis(implementation_function, model):
     input_prompt = "The quick brown fox jumps over the lazy dog."
     tokens, top_unembedded_residual_stream_caches, kl_divergences = (
         implementation_function(input_prompt)
